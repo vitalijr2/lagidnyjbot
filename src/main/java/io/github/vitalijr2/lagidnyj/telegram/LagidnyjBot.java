@@ -3,7 +3,6 @@ package io.github.vitalijr2.lagidnyj.telegram;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.badMethod;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.internalError;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isEditedMessage;
-import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isInlineQuery;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.ok;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.okWithBody;

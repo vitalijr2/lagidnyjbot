@@ -85,10 +85,6 @@ class BotTools {
     return update.has("edited_message");
   }
 
-  static boolean isInlineQuery(JSONObject update) {
-    return update.has("inline_query");
-  }
-
   static boolean isMessage(JSONObject update) {
     return update.has("message");
   }
