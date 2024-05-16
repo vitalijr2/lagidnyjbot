@@ -1,5 +1,8 @@
 package io.github.vitalijr2.lagidnyj.telegram;
 
+import static com.github.npathai.hamcrestopt.OptionalMatchers.isEmpty;
+import static com.github.npathai.hamcrestopt.OptionalMatchers.isPresent;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -12,12 +15,15 @@ import static org.mockito.Mockito.when;
 
 import com.google.cloud.functions.HttpResponse;
 import java.io.IOException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -58,6 +64,22 @@ class BotToolsTest {
       // then
       verify(logger).warn("Could not make HTTP {} response: {}", 678, "test exception");
     }
+  }
+
+  @DisplayName("Take text from a message")
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "take_text.csv", delimiterString = "|", numLinesToSkip = 1)
+  void takeTextFromMessage(String title, String message) {
+    // when and then
+    assertThat(BotTools.getText(new JSONObject(message)), isPresent());
+  }
+
+  @DisplayName("Take text from a message: no text")
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "not_take_text.csv", delimiterString = "|", numLinesToSkip = 1)
+  void notTakeTextFromMessage(String title, String message) {
+    // when and then
+    assertThat(BotTools.getText(new JSONObject(message)), isEmpty());
   }
 
 }

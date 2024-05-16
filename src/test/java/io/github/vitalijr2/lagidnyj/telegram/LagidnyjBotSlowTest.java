@@ -9,8 +9,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -32,7 +34,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -55,13 +57,8 @@ class LagidnyjBotSlowTest {
 
   @DisplayName("Webhook")
   @ParameterizedTest(name = "{0}")
-  @CsvSource(value = {"message|{\"message\":{\"text\":\"test message\"}}|message",
-      "edited message|{\"edited_message\":{\"text\":\"test message\"}}|edited message",
-      "via bot|{\"message\":{\"text\":\"test message\",\"via_bot\":{\"id\":12345}}}|N/A",
-      "inline query|{\"inline_query\":{\"query\":\"test query\"}}|N/A",
-      "chat member|{\"chat_member\":{\"date\":12345}}||N/A|N/A"}, delimiterString = "|", nullValues = "N/A")
-  void webhook(String title, String requestBody, String messageResponseBody)
-      throws IOException {
+  @CsvFileSource(resources = "webhook.csv", delimiterString = "|", nullValues = "N/A")
+  void webhook(String title, String requestBody, String messageResponseBody) throws IOException {
     // given
     var reader = new CharArrayReader(requestBody.toCharArray());
 
@@ -127,6 +124,34 @@ class LagidnyjBotSlowTest {
     verify(httpResponse).setStatusCode(500, "Internal Server Error");
     verify(httpResponse).appendHeader(eq("Server"), anyString());
     verifyNoMoreInteractions(httpResponse);
+  }
+
+  @DisplayName("Process message with Russian letters")
+  @Test
+  void russianLetters() throws IOException {
+    // given
+    var update = new JSONObject("{\"message\":{\"text\":\"ёж\"}}");
+
+    doNothing().when(bot).addUserToWatchList(isA(JSONObject.class));
+
+    // when
+    bot.processMessage(update);
+
+    // then
+    verify(bot).addUserToWatchList(isA(JSONObject.class));
+  }
+
+  @DisplayName("Process message without Russian letters")
+  @Test
+  void nonRussianLetters() throws IOException {
+    // given
+    var update = new JSONObject("{\"message\":{\"text\":\"qwerty\"}}");
+
+    // when
+    bot.processMessage(update);
+
+    // then
+    verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
   }
 
 }

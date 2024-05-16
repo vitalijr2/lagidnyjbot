@@ -1,0 +1,5 @@
+title                       | message
+message with text           | {"message":{"text":"test message"}}
+edited message with text    | {"edited_message":{"text":"test message"}}
+message with caption        | {"message":{"caption":"test message"}}
+edited message with caption | {"edited_message":{"caption":"test message"}}

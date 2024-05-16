@@ -1,6 +1,7 @@
 package io.github.vitalijr2.lagidnyj.telegram;
 
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.badMethod;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getText;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.internalError;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isEditedMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isMessage;
@@ -11,6 +12,7 @@ import static io.github.vitalijr2.lagidnyj.telegram.BotTools.viaBot;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import io.github.vitalijr2.lagidnyj.cyrillic.CyrillicTools;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
@@ -29,6 +31,7 @@ public class LagidnyjBot implements HttpFunction {
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
 
+
   /**
    * Get request body and send response back.
    *
@@ -42,8 +45,8 @@ public class LagidnyjBot implements HttpFunction {
   public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
     if (HTTP_POST_METHOD.equals(httpRequest.getMethod())) {
       try {
-        processRequestBody(httpRequest.getReader()).ifPresentOrElse(
-            body -> okWithBody(httpResponse, body), () -> ok(httpResponse));
+        processRequestBody(httpRequest.getReader()).ifPresentOrElse(body -> okWithBody(httpResponse, body),
+            () -> ok(httpResponse));
       } catch (IOException | JSONException exception) {
         logger.warn("Could not parse request body: {}", exception.getMessage());
         internalError(httpResponse);
@@ -57,7 +60,7 @@ public class LagidnyjBot implements HttpFunction {
 
   /**
    * If the Telegram update is a regular message or an inline query, pass it to the appropriate method:
-   * {@link #processInlineQuery(JSONObject)} or {@link #processMessage(JSONObject)}.
+   * {@link #processMessage(JSONObject)}.
    *
    * @param requestBodyReader request body
    * @return webhook answer if available
@@ -77,10 +80,29 @@ public class LagidnyjBot implements HttpFunction {
     return result;
   }
 
+  /**
+   * Process <a href="https://core.telegram.org/bots/api#message">a message</a> or an edited message.
+   * <p>
+   * It takes {@code text} or {@code caption}, and then looks it for the Cyrillic letters <strong>ё</strong>,
+   * <strong>ъ</strong>, <strong>ы</strong> and <strong>э</strong>.
+   *
+   * @param update Telegram update
+   * @return warning for a user, restriction if some warnings have sent before or null
+   */
   @VisibleForTesting
   @Nullable
   String processMessage(JSONObject update) {
-    return "message";
+    getText(update).map(CyrillicTools::hasRussianLetters).ifPresent(hasRussianLetters -> {
+      if (hasRussianLetters) {
+        addUserToWatchList(update);
+      }
+    });
+
+    return null;
+  }
+
+  @VisibleForTesting
+  void addUserToWatchList(JSONObject update) {
   }
 
 }

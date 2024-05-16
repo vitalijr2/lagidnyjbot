@@ -1,0 +1,4 @@
+title               | message
+dice message        | {"message":{"dice":{"emoji": "🎲", "value": 1}}}
+dice edited message | {"edited_message":{"dice":{"emoji": "🎲", "value": 1}}}
+inline query        | {"inline_query":{"query":"test query"}}
