@@ -119,6 +119,7 @@ public class LagidnyjBot implements HttpFunction {
    * @param update Telegram update
    */
   @VisibleForTesting
+  @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
   void addUserToWatchList(JSONObject update) {
   }
 
