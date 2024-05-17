@@ -1,3 +1,4 @@
+case title     | message                                                    | response body
 message        | {"message":{"text":"test message"}}                        | message
 edited message | {"edited_message":{"text":"test message"}}                 | edited message
 via bot        | {"message":{"text":"test message","via_bot":{"id":12345}}} | N/A

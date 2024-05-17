@@ -339,6 +339,12 @@
       <scope>test</scope>
       <version>2.0.0</version>
     </dependency>
+    <dependency>
+      <artifactId>jsonassert</artifactId>
+      <groupId>org.skyscreamer</groupId>
+      <scope>test</scope>
+      <version>1.5.1</version>
+    </dependency>
   </dependencies>
   <description>Obmežennja spilkuvannja rosijs'koju movoju v Telegram čati</description>
   <groupId>io.vitalijr2.lagidna-ukrajinizacija</groupId>

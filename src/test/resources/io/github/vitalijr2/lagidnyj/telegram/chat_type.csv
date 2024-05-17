@@ -1,0 +1,5 @@
+chat type  | message
+channel    | {"message":{"chat":{"type":"CHANNEL"}}}
+group      | {"message":{"chat":{"type":"Group"}}}
+private    | {"message":{"chat":{"type":"private"}}}
+supergroup | {"message":{"chat":{"type":"SuperGroup"}}}

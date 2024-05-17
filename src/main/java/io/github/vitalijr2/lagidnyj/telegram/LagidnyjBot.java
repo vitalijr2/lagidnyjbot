@@ -1,12 +1,15 @@
 package io.github.vitalijr2.lagidnyj.telegram;
 
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.badMethod;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatId;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getText;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.internalError;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isEditedMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isMessage;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isPrivateChat;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.ok;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.okWithBody;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.sendMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.viaBot;
 
 import com.google.cloud.functions.HttpFunction;
@@ -27,10 +30,11 @@ import org.slf4j.LoggerFactory;
 
 public class LagidnyjBot implements HttpFunction {
 
+  private static final String HELP_MESSAGE = "Більше інформації для чого цей бот та як ним користуватись в "
+      + "дописі про [лагідну українізацію](https://buymeacoffee.com/vitalij_r2/lagidna-ukrajinizacija)\\.";
   private static final String HTTP_POST_METHOD = "POST";
 
   private final Logger logger = LoggerFactory.getLogger(getClass());
-
 
   /**
    * Get request body and send response back.
@@ -92,15 +96,28 @@ public class LagidnyjBot implements HttpFunction {
   @VisibleForTesting
   @Nullable
   String processMessage(JSONObject update) {
+    logger.info(update.toString());
     getText(update).map(CyrillicTools::hasRussianLetters).ifPresent(hasRussianLetters -> {
       if (hasRussianLetters) {
         addUserToWatchList(update);
       }
     });
 
+    if (isPrivateChat(update)) {
+      var reply = sendMessage(getChatId(update), HELP_MESSAGE);
+
+      reply.put("method", "sendMessage");
+
+      return reply.toString();
+    }
     return null;
   }
 
+  /**
+   * Add user to a watching list.
+   *
+   * @param update Telegram update
+   */
   @VisibleForTesting
   void addUserToWatchList(JSONObject update) {
   }

@@ -7,8 +7,12 @@ import com.google.cloud.functions.HttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -27,7 +31,7 @@ class BotTools {
     var name = "unknown";
     var version = "unknown";
 
-    try (InputStream versionPropsStream = BotTools.class.getResourceAsStream("/lagidnyj-bot.properties")) {
+    try (InputStream versionPropsStream = BotTools.class.getResourceAsStream("/bot-tools.properties")) {
       var properties = new Properties();
 
       properties.load(versionPropsStream);
@@ -139,6 +143,27 @@ class BotTools {
   }
 
   /**
+   * Is it a private chat?
+   */
+  static boolean isPrivateChat(JSONObject update) {
+    return ChatType.Private.equals(getChatType(update));
+  }
+
+  /**
+   * Get chat identifier.
+   */
+  static Long getChatId(JSONObject update) {
+    return ((Number) update.optQuery("/message/chat/id")).longValue();
+  }
+
+  /**
+   * Get type of chat
+   */
+  static ChatType getChatType(JSONObject update) {
+    return ChatType.fromString((String) update.optQuery("/message/chat/type"));
+  }
+
+  /**
    * Take a {@code text} or {@code caption} fields from a message or an edited message.
    *
    * @param update Telegram update
@@ -158,6 +183,38 @@ class BotTools {
     }
 
     return (isNull(text) || text.isBlank()) ? Optional.empty() : Optional.of(text);
+  }
+
+  /**
+   * Make a Telegram message.
+   *
+   * @param chatId
+   * @param text
+   * @return
+   */
+  static JSONObject sendMessage(long chatId, @NotNull String text) {
+    var message = new JSONObject();
+
+    message.put("chat_id", chatId);
+    message.put("text", text);
+    message.put("parse_mode", "MarkdownV2");
+
+    return message;
+  }
+
+  enum ChatType {
+    Channel, Group, Private, Supergroup;
+
+    private static final Map<String, ChatType> LOOKUP_MAP = Stream.of(values())
+        .collect(Collectors.toMap((chatType) -> chatType.name().toLowerCase(), Function.identity()));
+
+    static ChatType fromString(String chatType) {
+      if (null == chatType) {
+        return null;
+      }
+
+      return LOOKUP_MAP.get(chatType.toLowerCase());
+    }
   }
 
 }

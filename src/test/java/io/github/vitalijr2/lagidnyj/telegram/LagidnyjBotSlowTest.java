@@ -39,11 +39,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("slow")
 class LagidnyjBotSlowTest {
-
 
   @Mock
   private HttpRequest httpRequest;
@@ -57,7 +57,7 @@ class LagidnyjBotSlowTest {
 
   @DisplayName("Webhook")
   @ParameterizedTest(name = "{0}")
-  @CsvFileSource(resources = "webhook.csv", delimiterString = "|", nullValues = "N/A")
+  @CsvFileSource(resources = "webhook.csv", delimiterString = "|", nullValues = "N/A", numLinesToSkip = 1)
   void webhook(String title, String requestBody, String messageResponseBody) throws IOException {
     // given
     var reader = new CharArrayReader(requestBody.toCharArray());
@@ -152,6 +152,21 @@ class LagidnyjBotSlowTest {
 
     // then
     verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
+  }
+
+  @DisplayName("Reply a help message in a private chat")
+  @Test
+  void helpMessageInPrivateChat() {
+    // given
+    var update = new JSONObject("{\"message\":{\"chat\":{\"id\":321,\"type\":\"private\"}}}");
+
+    // when
+    var reply = bot.processMessage(update);
+
+    // then
+    var jsonReply = new JSONObject(reply);
+    JSONAssert.assertEquals("{\"method\":\"sendMessage\",\"parse_mode\":\"MarkdownV2\",\"chat_id\":321}", jsonReply,
+        false);
   }
 
 }
