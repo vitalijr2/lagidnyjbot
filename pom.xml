@@ -122,6 +122,7 @@
               </excludes>
             </filter>
           </filters>
+          <outputDirectory>${project.build.directory}/shaded</outputDirectory>
           <transformers>
             <transformer
               implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer">
@@ -250,6 +251,22 @@
         </executions>
         <groupId>org.jacoco</groupId>
         <version>0.8.12</version>
+      </plugin>
+      <plugin>
+        <configuration>
+          <allowUnauthenticated>true</allowUnauthenticated>
+          <functionTarget>io.github.vitalijr2.lagidnyj.telegram.LagidnyjBot</functionTarget>
+          <gen2>true</gen2>
+          <name>lagidnyjbot</name>
+          <projectId>lagidnyjbot</projectId>
+          <region>us-central1</region>
+          <runtime>java17</runtime>
+          <triggerHttp>true</triggerHttp>
+          <source>target</source>
+        </configuration>
+        <groupId>com.google.cloud.functions</groupId>
+        <artifactId>function-maven-plugin</artifactId>
+        <version>0.11.0</version>
       </plugin>
     </plugins>
     <resources>
