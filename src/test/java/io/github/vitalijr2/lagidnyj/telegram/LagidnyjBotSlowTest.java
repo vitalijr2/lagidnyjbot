@@ -16,6 +16,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
@@ -39,7 +40,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("slow")
@@ -165,8 +165,7 @@ class LagidnyjBotSlowTest {
 
     // then
     var jsonReply = new JSONObject(reply);
-    JSONAssert.assertEquals("{\"method\":\"sendMessage\",\"parse_mode\":\"MarkdownV2\",\"chat_id\":321}", jsonReply,
-        false);
+    assertEquals("{\"method\":\"sendMessage\",\"parse_mode\":\"MarkdownV2\",\"chat_id\":321}", jsonReply, false);
   }
 
 }

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.google.cloud.functions.HttpResponse;
 import io.github.vitalijr2.lagidnyj.telegram.BotTools.ChatType;
@@ -29,7 +30,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,8 +110,7 @@ class BotToolsTest {
     var message = BotTools.sendMessage(12345, "test message");
 
     // then
-    JSONAssert.assertEquals("{\"parse_mode\":\"MarkdownV2\",\"text\":\"test message\",\"chat_id\":12345}", message,
-        true);
+    assertEquals("{\"parse_mode\":\"MarkdownV2\",\"text\":\"test message\",\"chat_id\":12345}", message, true);
   }
 
 }
