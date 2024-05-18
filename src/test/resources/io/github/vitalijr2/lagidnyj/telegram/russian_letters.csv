@@ -1,0 +1,5 @@
+case title | message
+ё          | {"message":{"text":"ёж","chat":{"type":"Group"}}}
+ъ          | {"message":{"text":"ъх","chat":{"type":"SuperGroup"}}}
+ы          | {"message":{"text":"ых","chat":{"type":"Group"}}}
+э          | {"message":{"text":"эх","chat":{"type":"SuperGroup"}}}

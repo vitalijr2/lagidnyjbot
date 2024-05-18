@@ -5,6 +5,7 @@ import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -127,10 +128,11 @@ class LagidnyjBotSlowTest {
   }
 
   @DisplayName("Process message with Russian letters")
-  @Test
-  void russianLetters() throws IOException {
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "russian_letters.csv", delimiterString = "|", numLinesToSkip = 1)
+  void russianLetters(String title, String message) throws IOException {
     // given
-    var update = new JSONObject("{\"message\":{\"text\":\"ёж\"}}");
+    var update = new JSONObject(message);
 
     doNothing().when(bot).addUserToWatchList(isA(JSONObject.class));
 
@@ -142,10 +144,11 @@ class LagidnyjBotSlowTest {
   }
 
   @DisplayName("Process message without Russian letters")
-  @Test
-  void nonRussianLetters() throws IOException {
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "non_russian_letters.csv", delimiterString = "|", numLinesToSkip = 1)
+  void nonRussianLetters(String chatType, String message) throws IOException {
     // given
-    var update = new JSONObject("{\"message\":{\"text\":\"qwerty\"}}");
+    var update = new JSONObject(message);
 
     // when
     bot.processMessage(update);
@@ -164,8 +167,24 @@ class LagidnyjBotSlowTest {
     var reply = bot.processMessage(update);
 
     // then
+    verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
+
     var jsonReply = new JSONObject(reply);
     assertEquals("{\"method\":\"sendMessage\",\"parse_mode\":\"MarkdownV2\",\"chat_id\":321}", jsonReply, false);
+  }
+
+  @DisplayName("Channels are ignored")
+  @Test
+  void channelsIgnored() {
+    // given
+    var update = new JSONObject("{\"message\":{\"text\":\"ёж\",\"chat\":{\"type\":\"channel\"}}}");
+
+    // when
+    var reply = bot.processMessage(update);
+
+    // then
+    verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
+    assertNull(reply);
   }
 
 }

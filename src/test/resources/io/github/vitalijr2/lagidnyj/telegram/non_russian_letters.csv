@@ -1,0 +1,3 @@
+chat type  | message
+group      | {"message":{"text":"qwerty","chat":{"type":"Group"}}}
+supergroup | {"message":{"text":"qwerty","chat":{"type":"SuperGroup"}}}

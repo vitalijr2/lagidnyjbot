@@ -143,13 +143,6 @@ class BotTools {
   }
 
   /**
-   * Is it a private chat?
-   */
-  static boolean isPrivateChat(JSONObject update) {
-    return ChatType.Private.equals(getChatType(update));
-  }
-
-  /**
    * Get chat identifier.
    */
   static Long getChatId(JSONObject update) {

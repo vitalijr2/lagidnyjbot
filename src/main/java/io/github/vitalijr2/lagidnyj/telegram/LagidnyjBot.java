@@ -2,11 +2,11 @@ package io.github.vitalijr2.lagidnyj.telegram;
 
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.badMethod;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatId;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatType;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getText;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.internalError;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isEditedMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isMessage;
-import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isPrivateChat;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.ok;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.okWithBody;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.sendMessage;
@@ -97,20 +97,25 @@ public class LagidnyjBot implements HttpFunction {
   @Nullable
   String processMessage(JSONObject update) {
     logger.info(update.toString());
-    getText(update).map(CyrillicTools::hasRussianLetters).ifPresent(hasRussianLetters -> {
-      if (hasRussianLetters) {
-        addUserToWatchList(update);
-      }
-    });
+    String reply = null;
+    switch (getChatType(update)) {
+      case Channel:
+        // do nothing
+        break;
+      case Private:
+        var helpMessage = sendMessage(getChatId(update), HELP_MESSAGE);
 
-    if (isPrivateChat(update)) {
-      var reply = sendMessage(getChatId(update), HELP_MESSAGE);
-
-      reply.put("method", "sendMessage");
-
-      return reply.toString();
+        helpMessage.put("method", "sendMessage");
+        reply = helpMessage.toString();
+        break;
+      default:
+        getText(update).map(CyrillicTools::hasRussianLetters).ifPresent(hasRussianLetters -> {
+          if (hasRussianLetters) {
+            addUserToWatchList(update);
+          }
+        });
     }
-    return null;
+    return reply;
   }
 
   /**
