@@ -4,6 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import com.google.cloud.functions.HttpResponse;
+import io.github.vitalijr2.lagidnyj.beans.User;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +23,14 @@ import org.slf4j.LoggerFactory;
 
 class BotTools {
 
+  private static final String APPLICATION_JSON = "application/json;charset=utf-8";
+  private static final String CONTENT_TYPE = "Content-Type";
   private static final String FULL_VERSION_STRING;
   private static final String HTTP_BAD_METHOD_RESPONSE;
   private static final Logger LOGGER = LoggerFactory.getLogger(BotTools.class);
+  private static final Pattern MARKDOWN_ESCAPE_PATTERN = Pattern.compile("([_*\\[\\]()~>#+-=|{}.!])");
   private static final String SERVER_HEADER = "Server";
+  private static final String TEXT_HTML = "text/html;charset=utf-8";
 
   static {
     var body = "";
@@ -47,6 +53,16 @@ class BotTools {
   }
 
   private BotTools() {
+  }
+
+  /**
+   * Markdown V2 escaping.
+   *
+   * @param text raw text
+   * @return Markdown safe text
+   */
+  static String markdownEscaping(String text) {
+    return MARKDOWN_ESCAPE_PATTERN.matcher(text).replaceAll("\\\\$1");
   }
 
   /**
@@ -80,6 +96,7 @@ class BotTools {
    * @param allowedMethods list of allowed methods
    */
   static void badMethod(@NotNull HttpResponse httpResponse, String... allowedMethods) {
+    httpResponse.setContentType(TEXT_HTML);
     doResponse(httpResponse, 405, "Method Not Allowed", HTTP_BAD_METHOD_RESPONSE).getHeaders()
         .put("Allow", List.of(allowedMethods));
   }
@@ -109,6 +126,7 @@ class BotTools {
    * @param body         response body
    */
   static void okWithBody(HttpResponse httpResponse, String body) {
+    httpResponse.setContentType(APPLICATION_JSON);
     doResponse(httpResponse, 200, "OK", body);
   }
 
@@ -144,16 +162,78 @@ class BotTools {
 
   /**
    * Get chat identifier.
+   *
+   * @param update Telegram update
+   * @return chat identifier
    */
+  @Nullable
   static Long getChatId(JSONObject update) {
-    return ((Number) update.optQuery("/message/chat/id")).longValue();
+    var message = getMessage(update);
+    Number chatId = null;
+
+    if (null != message) {
+      chatId = (Number) message.optQuery("/chat/id");
+    }
+
+    return (null == chatId) ? null : chatId.longValue();
   }
 
   /**
-   * Get type of chat
+   * Get type of chat.
+   *
+   * @param update Telegram update
+   * @return type of chat
    */
+  @Nullable
   static ChatType getChatType(JSONObject update) {
-    return ChatType.fromString((String) update.optQuery("/message/chat/type"));
+    var message = getMessage(update);
+    ChatType chatType = null;
+
+    if (null != message) {
+      chatType = ChatType.fromString((String) message.optQuery("/chat/type"));
+    }
+
+    return chatType;
+  }
+
+  /**
+   * Get a "from" user.
+   *
+   * @param update Telegram update
+   * @return user
+   */
+  @Nullable
+  static User getFrom(JSONObject update) {
+    var message = getMessage(update);
+    User user = null;
+
+    if (null != message) {
+      var from = message.getJSONObject("from");
+      user = new User(from.getNumber("id").longValue(), from.getString("first_name"),
+          from.optString("last_name", null), from.optString("username", null),
+          from.optString("language_code", null));
+    }
+
+    return user;
+  }
+
+  /**
+   * Get a message or edited message.
+   *
+   * @param update Telegram update
+   * @return message
+   */
+  @Nullable
+  static JSONObject getMessage(JSONObject update) {
+    JSONObject message = null;
+
+    if (isMessage(update)) {
+      message = update.getJSONObject("message");
+    } else if (isEditedMessage(update)) {
+      message = update.getJSONObject("edited_message");
+    }
+
+    return message;
   }
 
   /**
@@ -162,15 +242,11 @@ class BotTools {
    * @param update Telegram update
    * @return text value
    */
+  @NotNull
   static Optional<String> getText(JSONObject update) {
-    JSONObject message = null;
+    var message = getMessage(update);
     String text = null;
 
-    if (isMessage(update)) {
-      message = update.getJSONObject("message");
-    } else if (isEditedMessage(update)) {
-      message = update.getJSONObject("edited_message");
-    }
     if (null != message) {
       text = message.optString("text", message.optString("caption"));
     }
@@ -181,9 +257,10 @@ class BotTools {
   /**
    * Make a Telegram message.
    *
-   * @param chatId
-   * @param text
-   * @return
+   * @param chatId chat identifier
+   * @param text   Markdown text
+   * @return JSON message
+   * @see <a href="https://core.telegram.org/bots/api#markdownv2-style">Formatting options, MarkdownV2 style</a>
    */
   static JSONObject sendMessage(long chatId, @NotNull String text) {
     var message = new JSONObject();

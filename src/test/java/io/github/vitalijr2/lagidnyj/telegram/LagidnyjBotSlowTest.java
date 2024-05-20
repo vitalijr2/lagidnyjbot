@@ -21,6 +21,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import io.github.vitalijr2.lagidnyj.keeper.ChatKeeper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.CharArrayReader;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,12 +49,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class LagidnyjBotSlowTest {
 
   @Mock
+  private ChatKeeper chatKeeper;
+  @Mock
   private HttpRequest httpRequest;
   @Mock
   private HttpResponse httpResponse;
   @Mock
   private BufferedWriter writer;
 
+  @InjectMocks
   @Spy
   private LagidnyjBot bot;
 
@@ -76,6 +81,7 @@ class LagidnyjBotSlowTest {
     // then
     verify(httpResponse).setStatusCode(200, "OK");
     verify(httpResponse).appendHeader(eq("Server"), anyString());
+    verify(httpResponse).setContentType("application/json;charset=utf-8");
     if (null != messageResponseBody) {
       verify(httpResponse).getWriter();
       verify(writer).write(anyString());
@@ -101,6 +107,7 @@ class LagidnyjBotSlowTest {
     // then
     verify(httpResponse).setStatusCode(405, "Method Not Allowed");
     verify(httpResponse).appendHeader(eq("Server"), anyString());
+    verify(httpResponse).setContentType("text/html;charset=utf-8");
     verify(httpResponse).getWriter();
     verifyNoMoreInteractions(httpResponse);
     verify(writer).write(startsWith("<!doctype html>"));
@@ -130,7 +137,7 @@ class LagidnyjBotSlowTest {
   @DisplayName("Process message with Russian letters")
   @ParameterizedTest(name = "{0}")
   @CsvFileSource(resources = "russian_letters.csv", delimiterString = "|", numLinesToSkip = 1)
-  void russianLetters(String title, String message) throws IOException {
+  void russianLetters(String title, String message) {
     // given
     var update = new JSONObject(message);
 
@@ -146,7 +153,7 @@ class LagidnyjBotSlowTest {
   @DisplayName("Process message without Russian letters")
   @ParameterizedTest(name = "{0}")
   @CsvFileSource(resources = "non_russian_letters.csv", delimiterString = "|", numLinesToSkip = 1)
-  void nonRussianLetters(String chatType, String message) throws IOException {
+  void nonRussianLetters(String chatType, String message) {
     // given
     var update = new JSONObject(message);
 
@@ -185,6 +192,21 @@ class LagidnyjBotSlowTest {
     // then
     verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
     assertNull(reply);
+  }
+
+  @DisplayName("Add user to a watching list")
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "add_user_to_watching_list.csv", delimiterString = "|", numLinesToSkip = 1)
+  void addUserToWatchList(String title, String update) {
+    // given
+    var message = new JSONObject(update);
+    //var expectedUser = new User();
+
+    // when
+    bot.addUserToWatchList(message);
+
+    // then
+    //verify(chatKeeper).addUserToWatchList(eq(Long.valueOf(12345)), eq(expectedUser));
   }
 
 }

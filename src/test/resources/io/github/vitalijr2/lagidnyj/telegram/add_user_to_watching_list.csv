@@ -1,0 +1,3 @@
+case title     | message
+message        | {"message":{"chat":{"id":12345},"from":{"id":321,"first_name":"James"}}}
+edited message | {"edited_message":{"chat":{"id":12345},"from":{"id":321,"first_name":"James"}}}

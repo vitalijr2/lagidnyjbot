@@ -3,10 +3,12 @@ package io.github.vitalijr2.lagidnyj.telegram;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.badMethod;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatId;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatType;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getFrom;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getText;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.internalError;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isEditedMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isMessage;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.markdownEscaping;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.ok;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.okWithBody;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.sendMessage;
@@ -16,6 +18,7 @@ import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
 import io.github.vitalijr2.lagidnyj.cyrillic.CyrillicTools;
+import io.github.vitalijr2.lagidnyj.keeper.ChatKeeper;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
@@ -30,11 +33,20 @@ import org.slf4j.LoggerFactory;
 
 public class LagidnyjBot implements HttpFunction {
 
-  private static final String HELP_MESSAGE = "Більше інформації для чого цей бот та як ним користуватись в "
-      + "дописі про [лагідну українізацію](https://buymeacoffee.com/vitalij_r2/lagidna-ukrajinizacija)\\.";
+  private static final String HELP_MESSAGE = "Більше інформації для чого цей бот та як ним користуватись в дописі про %s.";
+  private static final String BUY_ME_A_COFFEE_LINK = "[лагідну українізацію](https://buymeacoffee.com/vitalij_r2/lagidna-ukrajinizacija)";
   private static final String HTTP_POST_METHOD = "POST";
 
+  private final ChatKeeper chatKeeper;
   private final Logger logger = LoggerFactory.getLogger(getClass());
+
+  public LagidnyjBot() {
+    this(null);
+  }
+
+  LagidnyjBot(ChatKeeper chatKeeper) {
+    this.chatKeeper = chatKeeper;
+  }
 
   /**
    * Get request body and send response back.
@@ -103,8 +115,10 @@ public class LagidnyjBot implements HttpFunction {
         // do nothing
         break;
       case Private:
-        var helpMessage = sendMessage(getChatId(update), HELP_MESSAGE);
+        var helpMessage = sendMessage(getChatId(update),
+            String.format(markdownEscaping(HELP_MESSAGE), BUY_ME_A_COFFEE_LINK));
 
+        logger.info("help message: {}", helpMessage);
         helpMessage.put("method", "sendMessage");
         reply = helpMessage.toString();
         break;
@@ -126,6 +140,7 @@ public class LagidnyjBot implements HttpFunction {
   @VisibleForTesting
   @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
   void addUserToWatchList(JSONObject update) {
+    chatKeeper.addUserToWatchList(getChatId(update), getFrom(update));
   }
 
 }
