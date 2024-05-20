@@ -47,6 +47,6 @@ limitations under the License.
 [Apache License v2.0](LICENSE)  
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-[bot]: https://t.me/lagidnyjbot
+[bot]: https://t.me/lagidnyjbot "лагідна українізація"
 
 [license]: http://www.apache.org/licenses/LICENSE-2.0 "Apache License, Version 2.0"
