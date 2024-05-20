@@ -8,27 +8,26 @@
 [![Українська](https://img.shields.io/badge/%F0%9F%93%84-%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D1%81%D1%8C%D0%BA%D0%BE%D1%8E-blue)](readme.uk.md)
 [![Latynka](https://img.shields.io/badge/%F0%9F%93%84-Latynka-blue)](readme.uk@latynka.md)
 
-## Restrictions on using in the Russian language in a Telegram chat.
+## Obmežennja spilkuvannja rosijs'koju movoju v Telegram čati.
 
-If:
+Jakščo:
 
-* you want conversation in your chat to be mainly in Ukrainian, or are you annoyed by Russian language,
-* Russian trolls sometimes run into your chat and the moderators don't have time to ban them, or you want to automate
-  this process
+* vy hočete ščob u vašomu čati spilkuvannja bulo perevažno ukrajins'koju movoju, čy vas dratuje rosijs'ka,
+* u vaš čat inodi zabigajut' moskal's'ki troli i moderatory ne vstygajut' jih vidljuvljuvaty, čy vy hočete
+  avtomatyzuvaty cej proces
 
-— then Telegram bot [@lagidnyjbot][bot] is just for you.
+— todi Telegram bot [@lagidnyjbot][bot] same dlja vas.
 
-## How to use the bot?
+## Jak korystuvatys' botom?
 
-Add a bot to your chat and give it chat moderator rights. As a moderator, he only needs one permission: to restrict chat
-visitors.
+Dodajte bota do svogo čatu ta nadajte jomu prava moderatora čatu. Jak moderatoru jomu potriben lyše odyn dozvil:
+obmežuvaty vidviduvačiv čatu.
 
-The bot will read all messages and if it finds the letters **ё**, **ъ**, **ы** or **э** in them, it will first warn the
-author of the
-messages about the rules of the chat, and then switch the person to "read-only" mode.
+Bot bude čytaty vsi povidomlennja i zustrivšy v nyh litery **ё**, **ъ**, **ы** čy **э** spočatku poperedyt' avtora povidomlen' pro
+pravyla čatu, a potim perevede ljudynu v režym _"til'ky čytannja"_.
 
-What to do with the violator next is up to you. I draw your attention to the fact that messages in the Russian language
-are not deleted.
+Ščo robyty z porušnykom pravyl dali - vže vaša sprava. Zvertaju vašu uvagu na te ščo povidomlennja z rosijs'koju movoju
+ne vydaljajut'sja.
 
 ## License
 
