@@ -7,7 +7,6 @@
 [![English](https://img.shields.io/badge/%F0%9F%93%84-English-blue)](readme.en.md)
 [![Latynka](https://img.shields.io/badge/%F0%9F%93%84-Latynka-blue)](readme.md)
 
-
 ## Обмеження спілкування російською мовою в Телеграм чаті
 
 Якщо:
