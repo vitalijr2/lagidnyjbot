@@ -21,6 +21,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import io.github.vitalijr2.lagidnyj.beans.User;
 import io.github.vitalijr2.lagidnyj.keeper.ChatKeeper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -197,16 +198,22 @@ class LagidnyjBotSlowTest {
   @DisplayName("Add user to a watching list")
   @ParameterizedTest(name = "{0}")
   @CsvFileSource(resources = "add_user_to_watching_list.csv", delimiterString = "|", numLinesToSkip = 1)
-  void addUserToWatchList(String title, String update) {
+  void addUserToWatchList(String title, String update, String expectedValue) {
     // given
-    var message = new JSONObject(update);
-    //var expectedUser = new User();
+    var index = 0;
+    var values = new String[5];
+
+    for (String value : expectedValue.split(" ")) {
+      values[index++] = value;
+    }
+
+    var expectedUser = new User(Long.parseLong(values[0]), values[1], values[2], values[3], values[4]);
 
     // when
-    bot.addUserToWatchList(message);
+    bot.addUserToWatchList(new JSONObject(update));
 
     // then
-    //verify(chatKeeper).addUserToWatchList(eq(Long.valueOf(12345)), eq(expectedUser));
+    verify(chatKeeper).addUserToWatchList(eq(Long.valueOf(12345)), eq(expectedUser));
   }
 
 }

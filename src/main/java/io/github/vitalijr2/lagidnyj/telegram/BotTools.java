@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 class BotTools {
 
   private static final String APPLICATION_JSON = "application/json;charset=utf-8";
-  private static final String CONTENT_TYPE = "Content-Type";
   private static final String FULL_VERSION_STRING;
   private static final String HTTP_BAD_METHOD_RESPONSE;
   private static final Logger LOGGER = LoggerFactory.getLogger(BotTools.class);
