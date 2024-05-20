@@ -4,30 +4,30 @@
 [![Codacy Coverage](https://app.codacy.com/project/badge/Coverage/b9b50b8488734a498b84a47488d6b89f)](https://app.codacy.com/gh/vitalijr2/lagidnyjbot/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 [![Java Version](https://img.shields.io/static/v1?label=java&message=17&color=blue&logo=java&logoColor=E23D28)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
-[![English](https://img.shields.io/badge/%F0%9F%93%84-English-blue)](readme.md)
 [![Українська](https://img.shields.io/badge/%F0%9F%93%84-%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D1%81%D1%8C%D0%BA%D0%BE%D1%8E-blue)](readme.uk.md)
-[![Latynka](https://img.shields.io/badge/%F0%9F%93%84-Latynka-blue)](readme.uk@latynka.md)
+[![Latynka](https://img.shields.io/badge/%F0%9F%93%84-Latynka-blue)](readme.md)
 
-## Обмеження спілкування російською мовою в Телеграм чаті.
+## Restrictions on using of Russian in a Telegram chat.
 
-Якщо:
+If:
 
-* ви хочете щоб у вашому чаті спілкування було переважно українською мовою, чи вас дратує російська,
-* у ваш чат іноді забігають москальські тролі і модератори не встигають їх відлювлювати, чи ви хочете автоматизувати цей
-  процес
+* you want conversation in your chat to be mainly in Ukrainian, or are you annoyed by Russian,
+* Russian trolls sometimes run into your chat and the moderators don't have time to ban them, or you want to automate
+  this process
 
-— тоді Telegram бот @lagidnyjbot саме для вас.
+— then Telegram bot [@lagidnyjbot][bot] is just for you.
 
-## Як користуватись ботом?
+## How to use the bot?
 
-Додайте бота до свого чату та надайте йому права модератора чату. Як модератору йому потрібен лише один дозвіл:
-обмежувати відвідувачів чату.
+Add a bot to your chat and give it chat moderator rights. As a moderator, he only needs one permission: to restrict chat
+visitors.
 
-Бот буде читати всі повідомлення і зустрівши в них літери **ё**, **ъ**, **ы** чи **э** спочатку попередить автора
-повідомлень про правила чату, а потім переведе людину в режим _"тільки читання"_.
+The bot will read all messages and if it finds the letters **ё**, **ъ**, **ы** or **э** in them, it will first warn the
+author of the
+messages about the rules of the chat, and then switch the person to "read-only" mode.
 
-Що робити з порушником правил далі - вже ваша справа. Звертаю вашу увагу на те що повідомлення з російською мовою не
-видаляються.
+What to do with the violator next is up to you. I draw your attention to the fact that messages in the Russian language
+are not deleted.
 
 ## License
 
