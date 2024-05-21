@@ -5,18 +5,24 @@ import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import io.github.vitalijr2.lagidnyj.beans.User;
+import io.github.vitalijr2.lagidnyj.keeper.ChatKeeper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.CharArrayReader;
@@ -32,8 +38,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,7 +49,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Tag("slow")
 class LagidnyjBotSlowTest {
 
-
+  @Mock
+  private ChatKeeper chatKeeper;
   @Mock
   private HttpRequest httpRequest;
   @Mock
@@ -50,18 +58,14 @@ class LagidnyjBotSlowTest {
   @Mock
   private BufferedWriter writer;
 
+  @InjectMocks
   @Spy
   private LagidnyjBot bot;
 
   @DisplayName("Webhook")
   @ParameterizedTest(name = "{0}")
-  @CsvSource(value = {"message|{\"message\":{\"text\":\"test message\"}}|message",
-      "edited message|{\"edited_message\":{\"text\":\"test message\"}}|edited message",
-      "via bot|{\"message\":{\"text\":\"test message\",\"via_bot\":{\"id\":12345}}}|N/A",
-      "inline query|{\"inline_query\":{\"query\":\"test query\"}}|N/A",
-      "chat member|{\"chat_member\":{\"date\":12345}}||N/A|N/A"}, delimiterString = "|", nullValues = "N/A")
-  void webhook(String title, String requestBody, String messageResponseBody)
-      throws IOException {
+  @CsvFileSource(resources = "webhook.csv", delimiterString = "|", nullValues = "N/A", numLinesToSkip = 1)
+  void webhook(String title, String requestBody, String messageResponseBody) throws IOException {
     // given
     var reader = new CharArrayReader(requestBody.toCharArray());
 
@@ -78,6 +82,7 @@ class LagidnyjBotSlowTest {
     // then
     verify(httpResponse).setStatusCode(200, "OK");
     verify(httpResponse).appendHeader(eq("Server"), anyString());
+    verify(httpResponse).setContentType("application/json;charset=utf-8");
     if (null != messageResponseBody) {
       verify(httpResponse).getWriter();
       verify(writer).write(anyString());
@@ -103,6 +108,7 @@ class LagidnyjBotSlowTest {
     // then
     verify(httpResponse).setStatusCode(405, "Method Not Allowed");
     verify(httpResponse).appendHeader(eq("Server"), anyString());
+    verify(httpResponse).setContentType("text/html;charset=utf-8");
     verify(httpResponse).getWriter();
     verifyNoMoreInteractions(httpResponse);
     verify(writer).write(startsWith("<!doctype html>"));
@@ -127,6 +133,87 @@ class LagidnyjBotSlowTest {
     verify(httpResponse).setStatusCode(500, "Internal Server Error");
     verify(httpResponse).appendHeader(eq("Server"), anyString());
     verifyNoMoreInteractions(httpResponse);
+  }
+
+  @DisplayName("Process message with Russian letters")
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "russian_letters.csv", delimiterString = "|", numLinesToSkip = 1)
+  void russianLetters(String title, String message) {
+    // given
+    var update = new JSONObject(message);
+
+    doNothing().when(bot).addUserToWatchList(isA(JSONObject.class));
+
+    // when
+    bot.processMessage(update);
+
+    // then
+    verify(bot).addUserToWatchList(isA(JSONObject.class));
+  }
+
+  @DisplayName("Process message without Russian letters")
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "non_russian_letters.csv", delimiterString = "|", numLinesToSkip = 1)
+  void nonRussianLetters(String chatType, String message) {
+    // given
+    var update = new JSONObject(message);
+
+    // when
+    bot.processMessage(update);
+
+    // then
+    verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
+  }
+
+  @DisplayName("Reply a help message in a private chat")
+  @Test
+  void helpMessageInPrivateChat() {
+    // given
+    var update = new JSONObject("{\"message\":{\"chat\":{\"id\":321,\"type\":\"private\"}}}");
+
+    // when
+    var reply = bot.processMessage(update);
+
+    // then
+    verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
+
+    var jsonReply = new JSONObject(reply);
+    assertEquals("{\"method\":\"sendMessage\",\"parse_mode\":\"MarkdownV2\",\"chat_id\":321}", jsonReply, false);
+  }
+
+  @DisplayName("Channels are ignored")
+  @Test
+  void channelsIgnored() {
+    // given
+    var update = new JSONObject("{\"message\":{\"text\":\"ёж\",\"chat\":{\"type\":\"channel\"}}}");
+
+    // when
+    var reply = bot.processMessage(update);
+
+    // then
+    verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
+    assertNull(reply);
+  }
+
+  @DisplayName("Add user to a watching list")
+  @ParameterizedTest(name = "{0}")
+  @CsvFileSource(resources = "add_user_to_watching_list.csv", delimiterString = "|", numLinesToSkip = 1)
+  void addUserToWatchList(String title, String update, String expectedValue) {
+    // given
+    var index = 0;
+    var values = new String[5];
+
+    for (String value : expectedValue.split(" ")) {
+      values[index++] = value;
+    }
+
+    var expectedUser = new User(Long.parseLong(values[0]), values[1], values[2], values[3], values[4]);
+
+    // when
+    bot.addUserToWatchList(new JSONObject(update));
+
+    // then
+    verify(chatKeeper).addUserToWatchList(eq(Long.valueOf(12345)), eq(expectedUser));
   }
 
 }

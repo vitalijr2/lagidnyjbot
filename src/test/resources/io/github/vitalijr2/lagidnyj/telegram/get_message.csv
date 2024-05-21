@@ -1,0 +1,4 @@
+case title     | message                              | expected value
+message        | {"message":{"text":"qwerty"}}        | {"text":"qwerty"}
+edited message | {"edited_message":{"text":"qwerty"}} | {"text":"qwerty"}
+not message    | {"inline_query":{"text":"qwerty"}}   | N/A

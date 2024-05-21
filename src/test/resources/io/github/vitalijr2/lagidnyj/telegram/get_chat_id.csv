@@ -1,0 +1,4 @@
+case title     | message                                  | expected value
+message        | {"message":{"chat":{"id":12345}}}        | 12345
+edited message | {"edited_message":{"chat":{"id":54321}}} | 54321
+not message    | {"inline_query":{"text":"qwerty"}}}      | N/A

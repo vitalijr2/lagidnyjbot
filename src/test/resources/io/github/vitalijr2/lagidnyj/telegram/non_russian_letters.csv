@@ -1,0 +1,5 @@
+chat type                  | message
+group                      | {"message":{"text":"qwerty","chat":{"type":"Group"}}}
+supergroup                 | {"message":{"text":"qwerty","chat":{"type":"SuperGroup"}}}
+group, edited_message      | {"edited_message":{"text":"qwerty","chat":{"type":"Group"}}}
+supergroup, edited_message | {"edited_message":{"text":"qwerty","chat":{"type":"SuperGroup"}}}

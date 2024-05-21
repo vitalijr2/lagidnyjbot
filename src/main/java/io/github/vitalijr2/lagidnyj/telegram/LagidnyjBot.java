@@ -1,17 +1,24 @@
 package io.github.vitalijr2.lagidnyj.telegram;
 
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.badMethod;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatId;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatType;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getFrom;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getText;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.internalError;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isEditedMessage;
-import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isInlineQuery;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isMessage;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.markdownEscaping;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.ok;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.okWithBody;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.sendMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.viaBot;
 
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import io.github.vitalijr2.lagidnyj.cyrillic.CyrillicTools;
+import io.github.vitalijr2.lagidnyj.keeper.ChatKeeper;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
@@ -26,9 +33,20 @@ import org.slf4j.LoggerFactory;
 
 public class LagidnyjBot implements HttpFunction {
 
+  private static final String HELP_MESSAGE = "Більше інформації для чого цей бот та як ним користуватись в дописі про %s.";
+  private static final String BUY_ME_A_COFFEE_LINK = "[лагідну українізацію](https://buymeacoffee.com/vitalij_r2/lagidna-ukrajinizacija)";
   private static final String HTTP_POST_METHOD = "POST";
 
+  private final ChatKeeper chatKeeper;
   private final Logger logger = LoggerFactory.getLogger(getClass());
+
+  public LagidnyjBot() {
+    this(null);
+  }
+
+  LagidnyjBot(ChatKeeper chatKeeper) {
+    this.chatKeeper = chatKeeper;
+  }
 
   /**
    * Get request body and send response back.
@@ -43,8 +61,8 @@ public class LagidnyjBot implements HttpFunction {
   public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
     if (HTTP_POST_METHOD.equals(httpRequest.getMethod())) {
       try {
-        processRequestBody(httpRequest.getReader()).ifPresentOrElse(
-            body -> okWithBody(httpResponse, body), () -> ok(httpResponse));
+        processRequestBody(httpRequest.getReader()).ifPresentOrElse(body -> okWithBody(httpResponse, body),
+            () -> ok(httpResponse));
       } catch (IOException | JSONException exception) {
         logger.warn("Could not parse request body: {}", exception.getMessage());
         internalError(httpResponse);
@@ -58,7 +76,7 @@ public class LagidnyjBot implements HttpFunction {
 
   /**
    * If the Telegram update is a regular message or an inline query, pass it to the appropriate method:
-   * {@link #processInlineQuery(JSONObject)} or {@link #processMessage(JSONObject)}.
+   * {@link #processMessage(JSONObject)}.
    *
    * @param requestBodyReader request body
    * @return webhook answer if available
@@ -78,10 +96,51 @@ public class LagidnyjBot implements HttpFunction {
     return result;
   }
 
+  /**
+   * Process <a href="https://core.telegram.org/bots/api#message">a message</a> or an edited message.
+   * <p>
+   * It takes {@code text} or {@code caption}, and then looks it for the Cyrillic letters <strong>ё</strong>,
+   * <strong>ъ</strong>, <strong>ы</strong> and <strong>э</strong>.
+   *
+   * @param update Telegram update
+   * @return warning for a user, restriction if some warnings have sent before or null
+   */
   @VisibleForTesting
   @Nullable
   String processMessage(JSONObject update) {
-    return "message";
+    logger.info(update.toString());
+    String reply = null;
+    switch (getChatType(update)) {
+      case Channel:
+        // do nothing
+        break;
+      case Private:
+        var helpMessage = sendMessage(getChatId(update),
+            String.format(markdownEscaping(HELP_MESSAGE), BUY_ME_A_COFFEE_LINK));
+
+        logger.info("help message: {}", helpMessage);
+        helpMessage.put("method", "sendMessage");
+        reply = helpMessage.toString();
+        break;
+      default:
+        getText(update).map(CyrillicTools::hasRussianLetters).ifPresent(hasRussianLetters -> {
+          if (hasRussianLetters) {
+            addUserToWatchList(update);
+          }
+        });
+    }
+    return reply;
+  }
+
+  /**
+   * Add user to a watching list.
+   *
+   * @param update Telegram update
+   */
+  @VisibleForTesting
+  @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
+  void addUserToWatchList(JSONObject update) {
+    chatKeeper.addUserToWatchList(getChatId(update), getFrom(update));
   }
 
 }

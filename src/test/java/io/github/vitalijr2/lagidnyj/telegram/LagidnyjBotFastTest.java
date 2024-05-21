@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +21,6 @@ import java.util.Optional;
 import org.json.JSONException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ class LagidnyjBotFastTest {
   private HttpRequest httpRequest;
   @Mock
   private HttpResponse httpResponse;
-
+  @Spy
   private LagidnyjBot bot;
 
   @BeforeAll
@@ -54,11 +54,6 @@ class LagidnyjBotFastTest {
   @AfterEach
   void tearDown() {
     clearInvocations(logger);
-  }
-
-  @BeforeEach
-  void setUp() {
-    bot = new LagidnyjBot();
   }
 
   @DisplayName("HTTP method not allowed")
@@ -74,6 +69,7 @@ class LagidnyjBotFastTest {
       assertDoesNotThrow(() -> bot.service(httpRequest, httpResponse));
 
       // then
+      verify(bot, never()).processRequestBody(isA(Reader.class));
       verify(logger).warn(eq("Method {} isn't implemented: {}"), eq(methodName), eq("1.2.3.4"));
       botTools.verify(() -> BotTools.badMethod(isA(HttpResponse.class), eq("POST")));
     }
@@ -85,8 +81,6 @@ class LagidnyjBotFastTest {
     try (var botTools = mockStatic(BotTools.class)) {
       // given
       var reader = new CharArrayReader("{\"a\":\"b\"}".toCharArray());
-
-      bot = spy(bot);
 
       when(httpRequest.getMethod()).thenReturn("POST");
       when(httpRequest.getReader()).thenReturn(new BufferedReader(reader));

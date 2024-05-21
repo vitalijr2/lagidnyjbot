@@ -5,28 +5,28 @@
 [![Java Version](https://img.shields.io/static/v1?label=java&message=17&color=blue&logo=java&logoColor=E23D28)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 
 [![English](https://img.shields.io/badge/%F0%9F%93%84-English-blue)](readme.en.md)
-[![Українська](https://img.shields.io/badge/%F0%9F%93%84-%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D1%81%D1%8C%D0%BA%D0%BE%D1%8E-blue)](readme.uk.md)
+[![Latynka](https://img.shields.io/badge/%F0%9F%93%84-Latynka-blue)](readme.md)
 
-## Obmežennja spilkuvannja rosijs'koju movoju v Telegram čati
+## Обмеження спілкування російською мовою в Телеграм чаті
 
-Jakščo:
+Якщо:
 
-* vy hočete ščob u vašomu čati spilkuvannja bulo perevažno ukrajins'koju movoju, čy vas dratuje rosijs'ka,
-* u vaš čat inodi zabigajut' moskal's'ki troli i moderatory ne vstygajut' jih vidljuvljuvaty, čy vy hočete
-  avtomatyzuvaty cej proces
+* ви хочете щоб у вашому чаті спілкування було переважно українською мовою, чи вас дратує російська,
+* у ваш чат іноді забігають москальські тролі і модератори не встигають їх відлювлювати, чи ви хочете автоматизувати цей
+  процес
 
-— todi Telegram bot [@lagidnyjbot][bot] same dlja vas.
+— тоді Telegram бот [@lagidnyjbot][bot] саме для вас.
 
-## Jak korystuvatys' botom?
+## Як користуватись ботом?
 
-Dodajte bota do svogo čatu ta nadajte jomu prava moderatora čatu. Jak moderatoru jomu potriben lyše odyn dozvil:
-obmežuvaty vidviduvačiv čatu.
+Додайте бота до свого чату та надайте йому права модератора чату. Як модератору йому потрібен лише один дозвіл:
+обмежувати відвідувачів чату.
 
-Bot bude čytaty vsi povidomlennja i zustrivšy v nyh litery **ё**, **ъ**, **ы** čy **э** spočatku poperedyt' avtora povidomlen' pro
-pravyla čatu, a potim perevede ljudynu v režym _"til'ky čytannja"_.
+Бот буде читати всі повідомлення і зустрівши в них літери **ё**, **ъ**, **ы** чи **э** спочатку попередить автора
+повідомлень про правила чату, а потім переведе людину в режим _"тільки читання"_.
 
-Ščo robyty z porušnykom pravyl dali - vže vaša sprava. Zvertaju vašu uvagu na te ščo povidomlennja z rosijs'koju movoju
-ne vydaljajut'sja.
+Що робити з порушником правил далі - вже ваша справа. Звертаю вашу увагу на те що повідомлення з російською мовою не
+видаляються.
 
 ## License
 
