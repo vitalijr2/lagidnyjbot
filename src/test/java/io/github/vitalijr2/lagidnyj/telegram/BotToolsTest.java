@@ -6,7 +6,7 @@ import static java.util.Objects.nonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,6 +21,7 @@ import com.google.cloud.functions.HttpResponse;
 import io.github.vitalijr2.lagidnyj.beans.User;
 import io.github.vitalijr2.lagidnyj.telegram.BotTools.ChatType;
 import java.io.IOException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -80,11 +81,26 @@ class BotToolsTest {
   }
 
   @DisplayName("Take text from a message: no text")
-  @ParameterizedTest(name = "{0}")
-  @CsvFileSource(resources = "not_take_text.csv", delimiterString = "|", numLinesToSkip = 1)
-  void notTakeTextFromMessage(String title, String message) {
+  @Test
+  void notTakeTextFromMessage() {
+    // given
+    var message = new JSONObject("{\"dice\":{\"emoji\": \"\uD83C\uDFB2\", \"value\": 1}}");
+
     // when and then
-    assertThat(BotTools.getText(new JSONObject(message)), isEmpty());
+    assertThat(BotTools.getText(message), isEmpty());
+  }
+
+  @DisplayName("Get a chat identifier")
+  @Test
+  void getChatIdentifier() {
+    // given
+    var chatMessage = new JSONObject("{\"chat\":{\"id\":12345}}");
+
+    // when
+    var result = BotTools.getChatId(chatMessage);
+
+    // then
+    assertEquals(12345, result);
   }
 
   @DisplayName("Chat type")
@@ -102,38 +118,13 @@ class BotToolsTest {
   @Test
   void notChat() {
     // when and then
-    assertNull(BotTools.getChatType(new JSONObject("{\"inline_query\":{\"query\":\"test query\"}}")));
-  }
-
-  @DisplayName("Send message")
-  @Test
-  void sendMessage() {
-    // when
-    var message = BotTools.sendMessage(12345, "test message");
-
-    // then
-    assertEquals("{\"parse_mode\":\"MarkdownV2\",\"text\":\"test message\",\"chat_id\":12345}", message, true);
-  }
-
-  @DisplayName("Get a chat identifier")
-  @ParameterizedTest(name = "{0}")
-  @CsvFileSource(resources = "get_chat_id.csv", delimiterString = "|", nullValues = "N/A", numLinesToSkip = 1)
-  void getChatIdentifier(String title, String update, Long expectedChatId) {
-    // when
-    var result = BotTools.getChatId(new JSONObject(update));
-
-    // then
-    if (nonNull(expectedChatId)) {
-      assertEquals(expectedChatId, result);
-    } else {
-      assertNull(result);
-    }
+    assertThrows(JSONException.class, () -> BotTools.getChatType(new JSONObject("{\"query\":\"test query\"}")));
   }
 
   @DisplayName("Get a \"from\" user")
   @ParameterizedTest(name = "{0}")
   @CsvFileSource(resources = "get_from.csv", delimiterString = "|", nullValues = "N/A", numLinesToSkip = 1)
-  void getFrom(String title, String update, String expectedValue) {
+  void getFrom(String title, String message, String expectedValue) {
     // given
     User expectedUser = null;
 
@@ -149,29 +140,67 @@ class BotToolsTest {
     }
 
     // when
-    var actualUser = BotTools.getFrom(new JSONObject(update));
+    var actualUser = BotTools.getFrom(new JSONObject(message));
 
     // then
-    if (nonNull(expectedValue)) {
-      assertEquals(expectedUser, actualUser);
-    } else {
-      assertNull(actualUser);
-    }
+    assertEquals(expectedUser, actualUser);
   }
 
-  @DisplayName("Get a message or edited message")
-  @ParameterizedTest(name = "{0}")
-  @CsvFileSource(resources = "get_message.csv", delimiterString = "|", nullValues = "N/A", numLinesToSkip = 1)
-  void getMessage(String title, String update, String expectedValue) {
+  @DisplayName("Not a user")
+  @Test
+  void notUser() {
+    // given
+    var message = new JSONObject("{\"inline_query\":{\"text\":\"qwerty\"}}");
+
+    // when and then
+    assertThrows(JSONException.class, () -> BotTools.getFrom(message));
+  }
+
+  @DisplayName("Get an edited message")
+  @Test
+  void getEditedMessage() {
+    // given
+    var update = new JSONObject("{\"edited_message\":{\"text\":\"qwerty\"}}");
+
     // when
-    var result = BotTools.getMessage(new JSONObject(update));
+    var result = BotTools.getEditedMessage(update);
 
     // then
-    if (nonNull(expectedValue)) {
-      assertEquals(expectedValue, result, true);
-    } else {
-      assertNull(result);
-    }
+    assertEquals("{\"text\":\"qwerty\"}", result, true);
+  }
+
+  @DisplayName("Get a message")
+  @Test
+  void getMessage() {
+    // given
+    var update = new JSONObject("{\"message\":{\"text\":\"qwerty\"}}");
+
+    // when
+    var result = BotTools.getMessage(update);
+
+    // then
+    assertEquals("{\"text\":\"qwerty\"}", result, true);
+  }
+
+  @DisplayName("Not a message")
+  @Test
+  void notMessage() {
+    // given
+    var update = new JSONObject("{\"inline_query\":{\"text\":\"qwerty\"}}");
+
+    // when and then
+    assertThrows(JSONException.class, () -> BotTools.getEditedMessage(update));
+    assertThrows(JSONException.class, () -> BotTools.getMessage(update));
+  }
+
+  @DisplayName("Send message")
+  @Test
+  void sendMessage() {
+    // when
+    var message = BotTools.sendMessage(12345, "test message");
+
+    // then
+    assertEquals("{\"parse_mode\":\"MarkdownV2\",\"text\":\"test message\",\"chat_id\":12345}", message, true);
   }
 
 }

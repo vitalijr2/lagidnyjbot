@@ -1,3 +1,3 @@
-case title     | message                                                                                                                                           | expected value
-message        | {"message":{"chat":{"id":12345},"from":{"id":321,"first_name":"James"}}}                                                                          | 321 James
-edited message | {"edited_message":{"chat":{"id":12345},"from":{"id":321,"first_name":"James","last_name":"Smith","username":"james_smith","language_code":"en"}}} | 321 James Smith james_smith en
+case title | message                                                                                                                        | expected value
+first name | {"chat":{"id":12345},"from":{"id":321,"first_name":"James"}}                                                                   | 12345 321 James
+full data  | {"chat":{"id":12345},"from":{"id":321,"first_name":"James","last_name":"Smith","username":"james_smith","language_code":"en"}} | 12345 321 James Smith james_smith en

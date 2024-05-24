@@ -253,6 +253,7 @@
         <version>0.8.12</version>
       </plugin>
       <plugin>
+        <artifactId>function-maven-plugin</artifactId>
         <configuration>
           <allowUnauthenticated>true</allowUnauthenticated>
           <functionTarget>io.github.vitalijr2.lagidnyj.telegram.LagidnyjBot</functionTarget>
@@ -261,11 +262,10 @@
           <projectId>lagidnyjbot</projectId>
           <region>us-central1</region>
           <runtime>java17</runtime>
-          <triggerHttp>true</triggerHttp>
           <source>target</source>
+          <triggerHttp>true</triggerHttp>
         </configuration>
         <groupId>com.google.cloud.functions</groupId>
-        <artifactId>function-maven-plugin</artifactId>
         <version>0.11.0</version>
       </plugin>
     </plugins>
@@ -292,8 +292,8 @@
       <version>1.1.0</version>
     </dependency>
     <dependency>
-      <groupId>org.json</groupId>
       <artifactId>json</artifactId>
+      <groupId>org.json</groupId>
       <version>20240303</version>
     </dependency>
     <dependency>

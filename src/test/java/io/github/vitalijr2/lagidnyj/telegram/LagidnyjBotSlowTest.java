@@ -21,8 +21,6 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
-import io.github.vitalijr2.lagidnyj.beans.User;
-import io.github.vitalijr2.lagidnyj.keeper.ChatKeeper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.CharArrayReader;
@@ -40,7 +38,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,15 +47,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class LagidnyjBotSlowTest {
 
   @Mock
-  private ChatKeeper chatKeeper;
-  @Mock
   private HttpRequest httpRequest;
   @Mock
   private HttpResponse httpResponse;
   @Mock
   private BufferedWriter writer;
 
-  @InjectMocks
   @Spy
   private LagidnyjBot bot;
 
@@ -140,12 +134,10 @@ class LagidnyjBotSlowTest {
   @CsvFileSource(resources = "russian_letters.csv", delimiterString = "|", numLinesToSkip = 1)
   void russianLetters(String title, String message) {
     // given
-    var update = new JSONObject(message);
-
     doNothing().when(bot).addUserToWatchList(isA(JSONObject.class));
 
     // when
-    bot.processMessage(update);
+    bot.processMessage(new JSONObject(message));
 
     // then
     verify(bot).addUserToWatchList(isA(JSONObject.class));
@@ -169,7 +161,7 @@ class LagidnyjBotSlowTest {
   @Test
   void helpMessageInPrivateChat() {
     // given
-    var update = new JSONObject("{\"message\":{\"chat\":{\"id\":321,\"type\":\"private\"}}}");
+    var update = new JSONObject("{\"chat\":{\"id\":321,\"type\":\"private\"}}");
 
     // when
     var reply = bot.processMessage(update);
@@ -185,7 +177,7 @@ class LagidnyjBotSlowTest {
   @Test
   void channelsIgnored() {
     // given
-    var update = new JSONObject("{\"message\":{\"text\":\"ёж\",\"chat\":{\"type\":\"channel\"}}}");
+    var update = new JSONObject("{\"text\":\"ёж\",\"chat\":{\"type\":\"channel\"}}");
 
     // when
     var reply = bot.processMessage(update);
@@ -193,27 +185,6 @@ class LagidnyjBotSlowTest {
     // then
     verify(bot, never()).addUserToWatchList(isA(JSONObject.class));
     assertNull(reply);
-  }
-
-  @DisplayName("Add user to a watching list")
-  @ParameterizedTest(name = "{0}")
-  @CsvFileSource(resources = "add_user_to_watching_list.csv", delimiterString = "|", numLinesToSkip = 1)
-  void addUserToWatchList(String title, String update, String expectedValue) {
-    // given
-    var index = 0;
-    var values = new String[5];
-
-    for (String value : expectedValue.split(" ")) {
-      values[index++] = value;
-    }
-
-    var expectedUser = new User(Long.parseLong(values[0]), values[1], values[2], values[3], values[4]);
-
-    // when
-    bot.addUserToWatchList(new JSONObject(update));
-
-    // then
-    verify(chatKeeper).addUserToWatchList(eq(Long.valueOf(12345)), eq(expectedUser));
   }
 
 }

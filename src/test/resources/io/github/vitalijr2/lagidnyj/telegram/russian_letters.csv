@@ -1,9 +1,5 @@
 case title | message
-ё          | {"message":{"text":"ёж","chat":{"type":"Group"}}}
-ъ          | {"message":{"text":"ъх","chat":{"type":"SuperGroup"}}}
-ы          | {"message":{"text":"ых","chat":{"type":"Group"}}}
-э          | {"message":{"text":"эх","chat":{"type":"SuperGroup"}}}
-ё, edited  | {"edited_message":{"text":"ёж","chat":{"type":"Group"}}}
-ъ, edited  | {"edited_message":{"text":"ъх","chat":{"type":"SuperGroup"}}}
-ы, edited  | {"edited_message":{"text":"ых","chat":{"type":"Group"}}}
-э, edited  | {"edited_message":{"text":"эх","chat":{"type":"SuperGroup"}}}
+ё          | {"text":"ёж","chat":{"type":"Group"}}}
+ъ          | {"text":"ъх","chat":{"type":"SuperGroup"}}
+ы          | {"text":"ых","chat":{"type":"Group"}}
+э          | {"text":"эх","chat":{"type":"SuperGroup"}}
