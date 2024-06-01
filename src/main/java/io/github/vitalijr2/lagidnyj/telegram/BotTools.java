@@ -23,7 +23,7 @@ import org.json.JSONPointerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BotTools {
+public class BotTools {
 
   private static final String APPLICATION_JSON = "application/json;charset=utf-8";
   private static final String EDITED_MESSAGE = "edited_message";
@@ -64,7 +64,7 @@ class BotTools {
    * @param text raw text
    * @return Markdown safe text
    */
-  static String markdownEscaping(String text) {
+  public static String markdownEscaping(String text) {
     return MARKDOWN_ESCAPE_PATTERN.matcher(text).replaceAll("\\\\$1");
   }
 
@@ -77,7 +77,8 @@ class BotTools {
    * @param body          HTTP response body
    * @return prepared HTTP response
    */
-  static HttpResponse doResponse(@NotNull HttpResponse httpResponse, int statusCode, @NotNull String statusMessage,
+  public static HttpResponse doResponse(@NotNull HttpResponse httpResponse, int statusCode,
+      @NotNull String statusMessage,
       @Nullable String body) {
     try {
       httpResponse.setStatusCode(statusCode, statusMessage);
@@ -98,7 +99,7 @@ class BotTools {
    * @param httpResponse   instance of HTTP response
    * @param allowedMethods list of allowed methods
    */
-  static void badMethod(@NotNull HttpResponse httpResponse, String... allowedMethods) {
+  public static void badMethod(@NotNull HttpResponse httpResponse, String... allowedMethods) {
     httpResponse.setContentType(TEXT_HTML);
     doResponse(httpResponse, 405, "Method Not Allowed", HTTP_BAD_METHOD_RESPONSE).getHeaders()
         .put("Allow", List.of(allowedMethods));
@@ -109,7 +110,7 @@ class BotTools {
    *
    * @param httpResponse instance of HTTP response
    */
-  static void internalError(@NotNull HttpResponse httpResponse) {
+  public static void internalError(@NotNull HttpResponse httpResponse) {
     doResponse(httpResponse, 500, "Internal Server Error", null);
   }
 
@@ -118,7 +119,7 @@ class BotTools {
    *
    * @param httpResponse instance of HTTP response
    */
-  static void ok(HttpResponse httpResponse) {
+  public static void ok(HttpResponse httpResponse) {
     okWithBody(httpResponse, null);
   }
 
@@ -128,7 +129,7 @@ class BotTools {
    * @param httpResponse instance of HTTP response
    * @param body         response body
    */
-  static void okWithBody(HttpResponse httpResponse, String body) {
+  public static void okWithBody(HttpResponse httpResponse, String body) {
     httpResponse.setContentType(APPLICATION_JSON);
     doResponse(httpResponse, 200, "OK", body);
   }
@@ -139,7 +140,7 @@ class BotTools {
    * @param update Telegram update
    * @return true if the message has the {@code via_bot} field.
    */
-  static boolean viaBot(JSONObject update) {
+  public static boolean viaBot(JSONObject update) {
     return nonNull(update.optQuery("/message/via_bot"));
   }
 
@@ -149,7 +150,7 @@ class BotTools {
    * @param update Telegram update
    * @return true if the message has the {@code edited_message} field.
    */
-  static boolean isEditedMessage(JSONObject update) {
+  public static boolean isEditedMessage(JSONObject update) {
     return update.has(EDITED_MESSAGE);
   }
 
@@ -159,7 +160,7 @@ class BotTools {
    * @param update Telegram update
    * @return true if the update has the {@code message} field.
    */
-  static boolean isMessage(JSONObject update) {
+  public static boolean isMessage(JSONObject update) {
     return update.has(MESSAGE);
   }
 
@@ -170,7 +171,7 @@ class BotTools {
    * @return chat identifier
    * @throws JSONPointerException if the message does not contain a chat object
    */
-  static long getChatId(JSONObject message) throws JSONPointerException {
+  public static long getChatId(JSONObject message) throws JSONPointerException {
     return ((Number) message.query("/chat/id")).longValue();
   }
 
@@ -181,7 +182,7 @@ class BotTools {
    * @return type of chat
    * @throws JSONPointerException if the message does not contain a chat object
    */
-  static ChatType getChatType(JSONObject message) throws JSONPointerException {
+  public static ChatType getChatType(JSONObject message) throws JSONPointerException {
     return ChatType.fromString((String) message.query("/chat/type"));
   }
 
@@ -193,7 +194,7 @@ class BotTools {
    * @throws JSONException if an update does not contain an edited message
    */
   @NotNull
-  static JSONObject getEditedMessage(JSONObject update) throws JSONException {
+  public static JSONObject getEditedMessage(JSONObject update) throws JSONException {
     return update.getJSONObject(EDITED_MESSAGE);
   }
 
@@ -204,7 +205,7 @@ class BotTools {
    * @return user
    */
   @NotNull
-  static User getFrom(JSONObject message) throws JSONException {
+  public static User getFrom(JSONObject message) throws JSONException {
     var from = message.getJSONObject("from");
 
     return new User(from.getNumber("id").longValue(), from.getString("first_name"), from.optString("last_name", null),
@@ -219,7 +220,7 @@ class BotTools {
    * @throws JSONException if an update does not contain a message
    */
   @NotNull
-  static JSONObject getMessage(JSONObject update) throws JSONException {
+  public static JSONObject getMessage(JSONObject update) throws JSONException {
     return update.getJSONObject(MESSAGE);
   }
 
@@ -230,7 +231,7 @@ class BotTools {
    * @return text value
    */
   @NotNull
-  static Optional<String> getText(JSONObject message) {
+  public static Optional<String> getText(JSONObject message) {
     var text = message.optString("text", message.optString("caption", null));
 
     return (isNull(text)) ? Optional.empty() : Optional.of(text);
@@ -244,7 +245,7 @@ class BotTools {
    * @return JSON message
    * @see <a href="https://core.telegram.org/bots/api#markdownv2-style">Formatting options, MarkdownV2 style</a>
    */
-  static JSONObject sendMessage(long chatId, @NotNull String text) {
+  public static JSONObject sendMessage(long chatId, @NotNull String text) {
     var message = new JSONObject();
 
     message.put("chat_id", chatId);
@@ -254,13 +255,13 @@ class BotTools {
     return message;
   }
 
-  enum ChatType {
+  public enum ChatType {
     Channel, Group, Private, Supergroup;
 
     private static final Map<String, ChatType> LOOKUP_MAP = Stream.of(values())
         .collect(Collectors.toMap((chatType) -> chatType.name().toLowerCase(), Function.identity()));
 
-    static ChatType fromString(String chatType) {
+    public static ChatType fromString(String chatType) {
       if (null == chatType) {
         return null;
       }
