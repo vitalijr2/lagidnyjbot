@@ -1,4 +1,3 @@
-case title  | message                                                                                                                  | expected value
-first name  | {"message":{"from":{"id":12345,"first_name":"James"}}}                                                                   | 12345 James
-all data    | {"message":{"from":{"id":12345,"first_name":"James","last_name":"Smith","username":"james_smith","language_code":"en"}}} | 12345 James Smith james_smith en
-not message | {"inline_query":{"text":"qwerty"}}}                                                                                      | N/A
+case title  | message                                                                                                      | expected value
+first name  | {"from":{"id":12345,"first_name":"James"}}                                                                   | 12345 James
+all data    | {"from":{"id":12345,"first_name":"James","last_name":"Smith","username":"james_smith","language_code":"en"}} | 12345 James Smith james_smith en

@@ -17,16 +17,20 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONPointerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class BotTools {
 
   private static final String APPLICATION_JSON = "application/json;charset=utf-8";
+  private static final String EDITED_MESSAGE = "edited_message";
   private static final String FULL_VERSION_STRING;
   private static final String HTTP_BAD_METHOD_RESPONSE;
   private static final Logger LOGGER = LoggerFactory.getLogger(BotTools.class);
+  private static final String MESSAGE = "message";
   private static final Pattern MARKDOWN_ESCAPE_PATTERN = Pattern.compile("([_*\\[\\]()~>#+-=|{}.!])");
   private static final String SERVER_HEADER = "Server";
   private static final String TEXT_HTML = "text/html;charset=utf-8";
@@ -146,7 +150,7 @@ class BotTools {
    * @return true if the message has the {@code edited_message} field.
    */
   static boolean isEditedMessage(JSONObject update) {
-    return update.has("edited_message");
+    return update.has(EDITED_MESSAGE);
   }
 
   /**
@@ -156,64 +160,55 @@ class BotTools {
    * @return true if the update has the {@code message} field.
    */
   static boolean isMessage(JSONObject update) {
-    return update.has("message");
+    return update.has(MESSAGE);
   }
 
   /**
    * Get chat identifier.
    *
-   * @param update Telegram update
+   * @param message Telegram message
    * @return chat identifier
+   * @throws JSONPointerException if the message does not contain a chat object
    */
-  @Nullable
-  static Long getChatId(JSONObject update) {
-    var message = getMessage(update);
-    Number chatId = null;
-
-    if (null != message) {
-      chatId = (Number) message.optQuery("/chat/id");
-    }
-
-    return (null == chatId) ? null : chatId.longValue();
+  static long getChatId(JSONObject message) throws JSONPointerException {
+    return ((Number) message.query("/chat/id")).longValue();
   }
 
   /**
    * Get type of chat.
    *
-   * @param update Telegram update
+   * @param message Telegram message
    * @return type of chat
+   * @throws JSONPointerException if the message does not contain a chat object
    */
-  @Nullable
-  static ChatType getChatType(JSONObject update) {
-    var message = getMessage(update);
-    ChatType chatType = null;
+  static ChatType getChatType(JSONObject message) throws JSONPointerException {
+    return ChatType.fromString((String) message.query("/chat/type"));
+  }
 
-    if (null != message) {
-      chatType = ChatType.fromString((String) message.optQuery("/chat/type"));
-    }
-
-    return chatType;
+  /**
+   * Get an edited message.
+   *
+   * @param update Telegram update
+   * @return message
+   * @throws JSONException if an update does not contain an edited message
+   */
+  @NotNull
+  static JSONObject getEditedMessage(JSONObject update) throws JSONException {
+    return update.getJSONObject(EDITED_MESSAGE);
   }
 
   /**
    * Get a "from" user.
    *
-   * @param update Telegram update
+   * @param message Telegram message
    * @return user
    */
-  @Nullable
-  static User getFrom(JSONObject update) {
-    var message = getMessage(update);
-    User user = null;
+  @NotNull
+  static User getFrom(JSONObject message) throws JSONException {
+    var from = message.getJSONObject("from");
 
-    if (null != message) {
-      var from = message.getJSONObject("from");
-      user = new User(from.getNumber("id").longValue(), from.getString("first_name"),
-          from.optString("last_name", null), from.optString("username", null),
-          from.optString("language_code", null));
-    }
-
-    return user;
+    return new User(from.getNumber("id").longValue(), from.getString("first_name"), from.optString("last_name", null),
+        from.optString("username", null), from.optString("language_code", null));
   }
 
   /**
@@ -221,36 +216,24 @@ class BotTools {
    *
    * @param update Telegram update
    * @return message
+   * @throws JSONException if an update does not contain a message
    */
-  @Nullable
-  static JSONObject getMessage(JSONObject update) {
-    JSONObject message = null;
-
-    if (isMessage(update)) {
-      message = update.getJSONObject("message");
-    } else if (isEditedMessage(update)) {
-      message = update.getJSONObject("edited_message");
-    }
-
-    return message;
+  @NotNull
+  static JSONObject getMessage(JSONObject update) throws JSONException {
+    return update.getJSONObject(MESSAGE);
   }
 
   /**
    * Take a {@code text} or {@code caption} fields from a message or an edited message.
    *
-   * @param update Telegram update
+   * @param message Telegram message
    * @return text value
    */
   @NotNull
-  static Optional<String> getText(JSONObject update) {
-    var message = getMessage(update);
-    String text = null;
+  static Optional<String> getText(JSONObject message) {
+    var text = message.optString("text", message.optString("caption", null));
 
-    if (null != message) {
-      text = message.optString("text", message.optString("caption"));
-    }
-
-    return (isNull(text) || text.isBlank()) ? Optional.empty() : Optional.of(text);
+    return (isNull(text)) ? Optional.empty() : Optional.of(text);
   }
 
   /**

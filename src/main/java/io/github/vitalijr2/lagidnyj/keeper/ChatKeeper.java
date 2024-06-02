@@ -1,16 +1,15 @@
 package io.github.vitalijr2.lagidnyj.keeper;
 
-import io.github.vitalijr2.lagidnyj.beans.User;
-import org.jetbrains.annotations.Nullable;
+import io.github.vitalijr2.lagidnyj.beans.DelayedChatNotification;
+import org.jetbrains.annotations.NotNull;
 
 public interface ChatKeeper {
 
   /**
    * Add user to a watching list.
    *
-   * @param chatId chat identifier
-   * @param user   Telegram user
+   * @param notification delayed notification
    */
-  void addUserToWatchList(@Nullable Long chatId, @Nullable User user);
+  void addUserToWatchList(@NotNull DelayedChatNotification notification);
 
 }

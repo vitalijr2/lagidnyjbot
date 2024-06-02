@@ -3,7 +3,9 @@ package io.github.vitalijr2.lagidnyj.telegram;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.badMethod;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatId;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getChatType;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getEditedMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getFrom;
+import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getMessage;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.getText;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.internalError;
 import static io.github.vitalijr2.lagidnyj.telegram.BotTools.isEditedMessage;
@@ -17,6 +19,7 @@ import static io.github.vitalijr2.lagidnyj.telegram.BotTools.viaBot;
 import com.google.cloud.functions.HttpFunction;
 import com.google.cloud.functions.HttpRequest;
 import com.google.cloud.functions.HttpResponse;
+import io.github.vitalijr2.lagidnyj.beans.DelayedChatNotification;
 import io.github.vitalijr2.lagidnyj.cyrillic.CyrillicTools;
 import io.github.vitalijr2.lagidnyj.keeper.ChatKeeper;
 import java.io.IOException;
@@ -89,8 +92,10 @@ public class LagidnyjBot implements HttpFunction {
 
     if (viaBot(update)) {
       logger.trace("Ignore message of another bot");
-    } else if (isMessage(update) || isEditedMessage(update)) {
-      result = Optional.ofNullable(processMessage(update));
+    } else if (isMessage(update)) {
+      result = Optional.ofNullable(processMessage(getMessage(update)));
+    } else if (isEditedMessage(update)) {
+      result = Optional.ofNullable(processMessage(getEditedMessage(update)));
     }
 
     return result;
@@ -102,33 +107,38 @@ public class LagidnyjBot implements HttpFunction {
    * It takes {@code text} or {@code caption}, and then looks it for the Cyrillic letters <strong>ё</strong>,
    * <strong>ъ</strong>, <strong>ы</strong> and <strong>э</strong>.
    *
-   * @param update Telegram update
+   * @param message Telegram message
    * @return warning for a user, restriction if some warnings have sent before or null
    */
   @VisibleForTesting
   @Nullable
-  String processMessage(JSONObject update) {
-    logger.info(update.toString());
+  String processMessage(JSONObject message) {
+    logger.trace(message.toString());
     String reply = null;
-    switch (getChatType(update)) {
-      case Channel:
-        // do nothing
-        break;
-      case Private:
-        var helpMessage = sendMessage(getChatId(update),
-            String.format(markdownEscaping(HELP_MESSAGE), BUY_ME_A_COFFEE_LINK));
+    try {
+      switch (getChatType(message)) {
+        case Channel:
+          // do nothing
+          break;
+        case Private:
+          var helpMessage = sendMessage(getChatId(message),
+              String.format(markdownEscaping(HELP_MESSAGE), BUY_ME_A_COFFEE_LINK));
 
-        logger.info("help message: {}", helpMessage);
-        helpMessage.put("method", "sendMessage");
-        reply = helpMessage.toString();
-        break;
-      default:
-        getText(update).map(CyrillicTools::hasRussianLetters).ifPresent(hasRussianLetters -> {
-          if (hasRussianLetters) {
-            addUserToWatchList(update);
-          }
-        });
+          logger.info("help message: {}", helpMessage);
+          helpMessage.put("method", "sendMessage");
+          reply = helpMessage.toString();
+          break;
+        default:
+          getText(message).map(CyrillicTools::hasRussianLetters).ifPresent(hasRussianLetters -> {
+            if (hasRussianLetters) {
+              addUserToWatchList(message);
+            }
+          });
+      }
+    } catch (JSONException exception) {
+      logger.warn("Could not parse message: {}", exception.getMessage());
     }
+
     return reply;
   }
 
@@ -140,7 +150,11 @@ public class LagidnyjBot implements HttpFunction {
   @VisibleForTesting
   @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
   void addUserToWatchList(JSONObject update) {
-    chatKeeper.addUserToWatchList(getChatId(update), getFrom(update));
+    var russianSpeaker = getFrom(update);
+    var notification = new DelayedChatNotification(getChatId(update), russianSpeaker.id(), russianSpeaker.firstName(),
+        russianSpeaker.lastName(), russianSpeaker.username(), russianSpeaker.languageCode());
+    logger.trace("Add user to watch list: {}", notification);
+    chatKeeper.addUserToWatchList(notification);
   }
 
 }
