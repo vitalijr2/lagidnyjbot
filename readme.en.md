@@ -49,7 +49,6 @@ limitations under the License.
 [Apache License v2.0](LICENSE)  
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-
 [codacy-badge]: https://app.codacy.com/project/badge/Grade/b9b50b8488734a498b84a47488d6b89f
 
 [codacy-badge-link]: https://app.codacy.com/gh/vitalijr2/lagidnyjbot/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
