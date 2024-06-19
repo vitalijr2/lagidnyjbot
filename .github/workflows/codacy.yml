@@ -65,7 +65,7 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: tests-and-target
-          path: target
+          path: .
       - name: Run Codacy Coverage Reporter
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
