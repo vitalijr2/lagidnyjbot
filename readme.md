@@ -2,7 +2,7 @@
 
 [![Codacy Badge][codacy-badge]][codacy-badge-link]
 [![Codacy Coverage][codacy-coverage]][codacy-coverage-link]  
-![Libraries.io dependency status for GitHub repo][dependency-status]
+[![Libraries.io dependency status for GitHub repo][dependency-status]][dependencies]
 [![Java Version][java-version]][jdk-download]
 
 [![English](https://img.shields.io/badge/%F0%9F%93%84-English-blue)](readme.en.md)
@@ -57,6 +57,8 @@ limitations under the License.
 [codacy-coverage-link]: https://app.codacy.com/gh/vitalijr2/lagidnyjbot/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage
 
 [dependency-status]: https://img.shields.io/librariesio/github/vitalijr2/lagidnyjbot
+
+[dependencies]: https://libraries.io/github/vitalijr2/lagidnyjbot
 
 [java-version]: https://img.shields.io/static/v1?label=java&message=17&color=blue&logo=java&logoColor=E23D28
 
