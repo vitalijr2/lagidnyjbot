@@ -26,7 +26,9 @@ jobs:
         with:
           name: tests-and-target
           path: |
-            target
+            webhook-bot/target
+            chat-keeper/target
+            google-cloud-function/target
           retention-days: 1
   codacy-security-scan:
     name: Codacy Security Scan
