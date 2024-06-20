@@ -10,7 +10,6 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import io.github.vitalijr2.lagidnyj.beans.User;
-import io.github.vitalijr2.lagidnyj.telegram.TelegramBotTools;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;

@@ -3,7 +3,6 @@ package io.github.vitalijr2.lagidnyj.cyrillic;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.vitalijr2.lagidnyj.cyrillic.CyrillicTools;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

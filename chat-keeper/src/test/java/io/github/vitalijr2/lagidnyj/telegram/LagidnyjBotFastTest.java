@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verify;
 
 import io.github.vitalijr2.lagidnyj.beans.DelayedChatNotification;
 import io.github.vitalijr2.lagidnyj.chatkeeper.ChatKeeper;
-import io.github.vitalijr2.lagidnyj.telegram.LagidnyjBot;
 import java.util.Arrays;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;

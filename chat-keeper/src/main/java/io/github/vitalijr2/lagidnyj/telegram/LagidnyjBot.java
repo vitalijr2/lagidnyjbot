@@ -1,8 +1,8 @@
 package io.github.vitalijr2.lagidnyj.telegram;
 
 import io.github.vitalijr2.lagidnyj.beans.DelayedChatNotification;
-import io.github.vitalijr2.lagidnyj.cyrillic.CyrillicTools;
 import io.github.vitalijr2.lagidnyj.chatkeeper.ChatKeeper;
+import io.github.vitalijr2.lagidnyj.cyrillic.CyrillicTools;
 import io.github.vitalijr2.telegram.webhookbot.TelegramWebhookBot;
 import java.io.Reader;
 import java.util.Optional;
@@ -19,7 +19,6 @@ public class LagidnyjBot implements TelegramWebhookBot {
 
   private static final String HELP_MESSAGE = "Більше інформації для чого цей бот та як ним користуватись в дописі про %s.";
   private static final String BUY_ME_A_COFFEE_LINK = "[лагідну українізацію](https://buymeacoffee.com/vitalij_r2/lagidna-ukrajinizacija)";
-  private static final String HTTP_POST_METHOD = "POST";
 
   private final ChatKeeper chatKeeper;
   private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -106,7 +105,8 @@ public class LagidnyjBot implements TelegramWebhookBot {
   @SuppressWarnings("PMD.UncommentedEmptyMethodBody")
   void addUserToWatchList(JSONObject update) {
     var russianSpeaker = TelegramBotTools.getFrom(update);
-    var notification = new DelayedChatNotification(TelegramBotTools.getChatId(update), russianSpeaker.id(), russianSpeaker.firstName(),
+    var notification = new DelayedChatNotification(TelegramBotTools.getChatId(update), russianSpeaker.id(),
+        russianSpeaker.firstName(),
         russianSpeaker.lastName(), russianSpeaker.username(), russianSpeaker.languageCode());
     logger.trace("Add user to watch list: {}", notification);
     chatKeeper.addUserToWatchList(notification);

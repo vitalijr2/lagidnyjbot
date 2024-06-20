@@ -1,6 +1,6 @@
 package io.github.vitalijr2.lagidnyj.telegram;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.github.vitalijr2.lagidnyj.telegram.TelegramBotTools.ChatType;
 import org.junit.jupiter.api.DisplayName;

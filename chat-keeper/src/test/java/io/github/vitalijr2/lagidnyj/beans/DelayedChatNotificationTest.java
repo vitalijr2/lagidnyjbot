@@ -2,7 +2,6 @@ package io.github.vitalijr2.lagidnyj.beans;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.github.vitalijr2.lagidnyj.beans.DelayedChatNotification;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
-import io.github.vitalijr2.lagidnyj.telegram.LagidnyjBot;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import org.json.JSONObject;
