@@ -20,7 +20,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SimpleChatKeeper implements ChatKeeper, Runnable {
+public class SimpleChatKeeper implements AutoCloseable, ChatKeeper, Runnable {
 
   public static final String CACHE_CONFIG_FILE = "chat-keeper.xml";
   public static final long DEFAULT_KEEPING_DELAY = 186;
@@ -67,6 +67,14 @@ public class SimpleChatKeeper implements ChatKeeper, Runnable {
       notificationQueue.offer(notification);
     } else {
       chatKeeperCache.put(notification.lookupId(), ++counter);
+    }
+  }
+
+  @Override
+  public void close() throws Exception {
+    charKeeperExecutor.shutdown();
+    if (!charKeeperExecutor.awaitTermination(DEFAULT_KEEPING_DELAY, TimeUnit.SECONDS)) {
+      charKeeperExecutor.shutdownNow();
     }
   }
 
