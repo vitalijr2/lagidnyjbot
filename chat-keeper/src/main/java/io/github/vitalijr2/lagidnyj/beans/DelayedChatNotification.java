@@ -52,4 +52,15 @@ public record DelayedChatNotification(long chatId, long userId, @NotNull String 
     return timeUnit.convert(secondsOfDelay, TimeUnit.SECONDS);
   }
 
+  /**
+   * Lookup ID.
+   * <p>
+   * The identifier is used for caching of counter, equals chatId + userId.
+   *
+   * @return lookup ID
+   */
+  public String lookupId() {
+    return chatId + ":" + userId;
+  }
+
 }

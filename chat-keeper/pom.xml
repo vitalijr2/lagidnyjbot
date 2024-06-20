@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <artifactId>chat-keeper</artifactId>
   <build>
     <plugins>
@@ -31,6 +30,28 @@
     <dependency>
       <artifactId>slf4j-api</artifactId>
       <groupId>org.slf4j</groupId>
+    </dependency>
+    <dependency>
+      <artifactId>cache-api</artifactId>
+      <groupId>javax.cache</groupId>
+      <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <artifactId>ehcache</artifactId>
+      <exclusions>
+        <exclusion>
+          <artifactId>jaxb-runtime</artifactId>
+          <groupId>org.glassfish.jaxb</groupId>
+        </exclusion>
+      </exclusions>
+      <groupId>org.ehcache</groupId>
+      <version>3.10.8</version>
+    </dependency>
+    <dependency>
+      <artifactId>jaxb-runtime</artifactId>
+      <groupId>org.glassfish.jaxb</groupId>
+      <scope>runtime</scope>
+      <version>3.0.2</version>
     </dependency>
     <!-- test -->
     <dependency>
@@ -70,7 +91,6 @@
       <groupId>com.ocarlsen.test</groupId>
     </dependency>
   </dependencies>
-  <groupId>io.vitalijr2.lagidna-ukrajinizacija</groupId>
   <modelVersion>4.0.0</modelVersion>
   <name>Chat Keeper</name>
   <parent>

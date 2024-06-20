@@ -35,4 +35,15 @@ class DelayedChatNotificationTest {
     assertEquals(expectedDelay, delayed.getDelay(timeUnit));
   }
 
+  @DisplayName("Lookup ID: chatId + userId")
+  @ParameterizedTest(name = "{2}")
+  @CsvSource({"123,321,123:321", "321,123,321:123", "123,123,123:123"})
+  void lookupId(long chatId, long userId, String expectedValue) {
+    // given
+    var delayed = new DelayedChatNotification(chatId, userId, "John", "Smith", "johnsmith", "en");
+
+    // when and then
+    assertEquals(expectedValue, delayed.lookupId());
+  }
+
 }

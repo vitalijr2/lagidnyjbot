@@ -1,7 +1,7 @@
 package io.github.vitalijr2.lagidnyj.chatkeeper;
 
 import io.github.vitalijr2.lagidnyj.beans.DelayedChatNotification;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +19,6 @@ public interface ChatKeeper {
    *
    * @return map of chat identifier and delayed notification
    */
-  Map<Long, Collection<DelayedChatNotification>> getDelayedNotifications();
+  Map<Long, List<DelayedChatNotification>> getDelayedNotifications();
 
 }
