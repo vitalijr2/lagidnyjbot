@@ -360,7 +360,7 @@
       <artifactId>jsonassert</artifactId>
       <groupId>org.skyscreamer</groupId>
       <scope>test</scope>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
     </dependency>
   </dependencies>
   <description>Obmežennja spilkuvannja rosijs'koju movoju v Telegram čati</description>
