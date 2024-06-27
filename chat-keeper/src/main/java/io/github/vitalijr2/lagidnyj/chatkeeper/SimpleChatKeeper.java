@@ -4,6 +4,7 @@ import static io.github.vitalijr2.lagidnyj.telegram.TelegramBotTools.sendMessage
 import static java.util.Objects.requireNonNull;
 
 import io.github.vitalijr2.lagidnyj.beans.DelayedChatNotification;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,10 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.cache.Cache;
+import javax.cache.CacheException;
 import javax.cache.Caching;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -22,19 +25,20 @@ import org.slf4j.LoggerFactory;
 
 public class SimpleChatKeeper implements AutoCloseable, ChatKeeper, Runnable {
 
-  public static final String CACHE_CONFIG_FILE = "chat-keeper.xml";
   public static final long DEFAULT_KEEPING_DELAY = 186;
-  private final Cache<String, Integer> chatKeeperCache;
+  private static final String CACHE_CONFIG_FILE = "/chat-keeper.xml";
+  private static final String CONFIGURATION_IS_NOF_FOUND = "Cache configuration is nof found";
+  private final Cache<String, AtomicInteger> chatKeeperCache;
   private final ScheduledExecutorService charKeeperExecutor;
   private final Logger logger = LoggerFactory.getLogger(getClass());
   private final BlockingQueue<DelayedChatNotification> notificationQueue;
 
   public SimpleChatKeeper() {
-    this(getCache(CACHE_CONFIG_FILE), getQueue(), getScheduledExecutorService());
+    this(getCache(SimpleChatKeeper.class, CACHE_CONFIG_FILE), getQueue(), getScheduledExecutorService());
   }
 
   @VisibleForTesting
-  SimpleChatKeeper(Cache<String, Integer> cache, BlockingQueue<DelayedChatNotification> queue,
+  SimpleChatKeeper(Cache<String, AtomicInteger> cache, BlockingQueue<DelayedChatNotification> queue,
       ScheduledExecutorService scheduledExecutorService) {
     chatKeeperCache = cache;
     notificationQueue = queue;
@@ -44,11 +48,16 @@ public class SimpleChatKeeper implements AutoCloseable, ChatKeeper, Runnable {
   }
 
   @VisibleForTesting
-  static @NotNull Cache<String, Integer> getCache(String configFile) {
-    var manager = Caching.getCachingProvider().getCacheManager();
+  static @NotNull Cache<String, AtomicInteger> getCache(Class clazz, String configFile) {
+    try {
+      var manager = Caching.getCachingProvider()
+          .getCacheManager(clazz.getResource(configFile).toURI(), clazz.getClass().getClassLoader());
 
-    return requireNonNull(manager.getCache("chat-keeper", String.class, Integer.class),
-        "Cache configuration is nof found");
+      return requireNonNull(manager.getCache("chat-keeper", String.class, AtomicInteger.class),
+          CONFIGURATION_IS_NOF_FOUND);
+    } catch (URISyntaxException exception) {
+      throw new CacheException(CONFIGURATION_IS_NOF_FOUND, exception);
+    }
   }
 
   private static @NotNull DelayQueue<DelayedChatNotification> getQueue() {
@@ -65,13 +74,14 @@ public class SimpleChatKeeper implements AutoCloseable, ChatKeeper, Runnable {
 
     if (counter == null) {
       notificationQueue.offer(notification);
+      logger.debug("Added notification {} to the delay queue", notification);
     } else {
-      chatKeeperCache.put(notification.lookupId(), ++counter);
+      logger.debug("Increment cached counter to {} by notification {}", counter.incrementAndGet(), notification);
     }
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() throws InterruptedException {
     charKeeperExecutor.shutdown();
     if (!charKeeperExecutor.awaitTermination(DEFAULT_KEEPING_DELAY, TimeUnit.SECONDS)) {
       charKeeperExecutor.shutdownNow();
@@ -83,8 +93,7 @@ public class SimpleChatKeeper implements AutoCloseable, ChatKeeper, Runnable {
     var notificationSet = new HashSet<DelayedChatNotification>();
 
     logger.trace("Notification queue's size: {}", notificationQueue.size());
-    notificationQueue.drainTo(notificationSet);
-    logger.trace("Get {} available elements", notificationSet.size());
+    logger.trace("Get {} available elements", notificationQueue.drainTo(notificationSet));
 
     return notificationSet.stream().collect(Collectors.groupingBy(DelayedChatNotification::chatId));
   }

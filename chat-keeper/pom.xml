@@ -38,6 +38,7 @@
     </dependency>
     <dependency>
       <artifactId>ehcache</artifactId>
+      <classifier>jakarta</classifier>
       <exclusions>
         <exclusion>
           <artifactId>jaxb-runtime</artifactId>
@@ -50,8 +51,7 @@
     <dependency>
       <artifactId>jaxb-runtime</artifactId>
       <groupId>org.glassfish.jaxb</groupId>
-      <scope>runtime</scope>
-      <version>3.0.2</version>
+      <version>4.0.5</version>
     </dependency>
     <!-- test -->
     <dependency>

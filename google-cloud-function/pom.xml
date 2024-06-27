@@ -13,6 +13,13 @@
         </configuration>
         <groupId>org.apache.maven.plugins</groupId>
       </plugin>
+      <!--
+       TODO: add a stub bot implementation
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+      </plugin>
+      -->
       <plugin>
         <artifactId>jacoco-maven-plugin</artifactId>
         <groupId>org.jacoco</groupId>
