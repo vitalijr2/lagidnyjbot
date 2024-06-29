@@ -26,7 +26,9 @@ jobs:
         with:
           name: tests-and-target
           path: |
-            target
+            webhook-bot/target
+            chat-keeper/target
+            google-cloud-function/target
           retention-days: 1
   codacy-security-scan:
     name: Codacy Security Scan
@@ -63,9 +65,9 @@ jobs:
         uses: actions/download-artifact@master
         with:
           name: tests-and-target
-          path: target
+          path: .
       - name: Run Codacy Coverage Reporter
         uses: codacy/codacy-coverage-reporter-action@v1.3.0
         with:
-          coverage-reports: target/site/jacoco/jacoco.xml
+          coverage-reports: webhook-bot/target/site/jacoco/jacoco.xml,chat-keeper/target/site/jacoco/jacoco.xml,google-cloud-function/target/site/jacoco/jacoco.xml
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
